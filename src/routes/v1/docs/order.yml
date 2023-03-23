@@ -1,0 +1,313 @@
+tags:
+  - name: Order
+    description: "Order sysmtem"
+/orders:
+  get:
+    summary: get all orders
+    tags: [Order]
+    responses:
+      "200":
+        description: orders
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Orders'
+  post:
+    summary: create orders
+    tags: [Order]
+    requestBody:
+      $ref: '#/components/requestBody/OrderCreate'
+    security:
+    - bearerAuth: []
+    responses:
+      "200":
+        description: order created
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreated'
+
+/orders/{orderId}:
+  get:
+    summary: get order detail
+    tags: [Order]
+    parameters:
+      - in: path
+        name: orderId
+        schema:
+          type: string
+        example:
+          63c21ef227bdf3c88ee0c930
+
+    responses:
+      "200":
+        description: order detail
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+
+/orders/match:
+  get:
+    summary: get matched orders
+    tags: [Order]
+    parameters:
+      - in: query
+        name: startTime
+        schema:
+          type: string
+        example: 2023-12-30 20:30
+      - in: query
+        name: departureCity
+        schema:
+          type: string
+        example: TPE
+      - in: query
+        name: arrivalCity
+        schema:
+          type: string
+        example: TAN
+      - in: query
+        name: departurePoint
+        schema:
+          type: string
+        example: TPE_STATION
+      - in: query
+        name: arrivalPoint
+        schema:
+          type: string
+        example: TAN_STATION                
+    responses:
+      "200":
+        description: matched orders
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Orders'
+
+/orders/apply/:orderId:
+  patch:
+    summary: update order content (目前暫時先給乘客申請共乘使用，會再重構)
+    tags: [Order]
+    parameters:
+      - in: path
+        name: orderId
+        schema:
+          type: string
+        example:
+          63c21ef227bdf3c88ee0c930
+    responses:
+      "200":
+        description: order with updated passenger info
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      "422":
+        description: certain scenarios that passenger cannot apply
+        content:
+          application/json:
+            example: 
+              failed owing to full of passengers
+
+/orders/approve-application:
+  post:
+    summary: approve application from passengers
+    tags: [Order]
+    security:
+    - bearerAuth: []
+    requestBody:
+      $ref: '#/components/requestBody/HandlePassengerApplication'
+    responses:
+      "200":
+        description: approved order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      "404":
+        description: not found
+        content:
+          application/json:
+            example:
+              order not found /
+              no passengers found in this order /
+              order full /
+              passenger has been confirmed before
+
+/orders/cancel-application:
+  post:
+    summary: cancel application from passengers
+    tags: [Order]
+    security:
+    - bearerAuth: []
+    requestBody:
+      $ref: '#/components/requestBody/HandlePassengerApplication'
+    responses:
+      200:
+        description: approved order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      404:
+        description: not found
+        content:
+          application/json:
+            example:
+              order not found /
+              no passengers found in this order /
+              passenger not applied yet
+
+/orders/driver-check/:orderId:
+  patch:
+    tags: [Order]
+    summary: "Driver check something about order, including orderStatus, maxPassengers, maxBaggageCount, passengerStatus, and note"
+    parameters:
+    - in: path
+      name: orderId
+      schema:
+        type: string
+        example: 63af1d891c11b42a030c1c6d
+      required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              orderStatus:
+                type: string
+                example: "Either 'exist' or 'canceled'"
+              maxPassengers: 
+                type: string
+                example: "Please enter a number to set the maximum number of passengers"
+              maxBaggageCount:
+                type: string
+                example: "Please enter a number to set the maximum number of bags"
+              note:
+                type: string
+                example: "Additional notes about the order"
+    security:
+      - bearerAuth: []
+
+    responses:
+      200:
+        description: Successful response
+      400:
+        description: Bad request. The request body is invalid or incomplete.
+      401:
+        description: Unauthorized. The user is not authenticated or does not have the necessary permissions.
+      404:
+        description: Not found. The specified resource could not be found.
+      500:
+        description: Internal server error. An unexpected error occurred on the server.
+
+/orders/:orderId/set-order-viewed:
+  post:
+    tags: [Order]
+    summary: "record viewed record by adding current user into order"
+    parameters:
+      - in: path
+        name: orderId
+        schema:
+          type: string
+          example: 63af1d891c11b42a030c1c6d
+        required: true
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Successfully set as viewed
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      404:
+        description: not found
+
+/orders/get-viewed-record:
+  post:
+    tags: [Order]
+    summary: "get viewed records"
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Get viewed record list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/orderViewed'
+      404:
+        description: not found
+
+/orders/pending-confirmation/:chatroomUserId:
+  post:
+    tags: [Order]
+    summary: "get pending confirmation orders info"
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: chatroomUserId (聊聊內對方的 userId)
+        schema:
+          type: string
+          example: 1c6d1d891c11b42a030c1c6d
+        required: true  
+    responses:
+      200:
+        description: Get pending confirmation orders info
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/orderPendingConfirmation'
+      404:
+        description: not found
+
+/orders/toll-fee:
+  get:
+    summary: get toll fee of order
+    tags: [Order]
+    parameters:
+      - in: query
+        name: departurePoint
+        required: true
+        schema:
+          type: string
+        example: 臺北市中正區忠孝西路1段49號
+      - in: query
+        name: arrivalPoint
+        required: true
+        schema:
+          type: string
+        example: 台南市東區大學路西段1號                
+    responses:
+      "200":
+        description: toll fee return
+      "400":
+        description: input error
+
+/orders/get-distance-and-duration:
+  get:
+    summary: get distance(km) and duration(minutes)
+    tags: [Order]
+    parameters:
+      - in: query
+        name: departurePoint
+        required: true
+        schema:
+          type: string
+        example: 臺北市中正區忠孝西路1段49號
+      - in: query
+        name: arrivalPoint
+        required: true
+        schema:
+          type: string
+        example: 台南市東區大學路西段1號                
+    responses:
+      "200":
+        description: distance and duration return
+      "400":
+        description: input error

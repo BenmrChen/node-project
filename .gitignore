@@ -1,0 +1,17 @@
+# Dependencies
+node_modules
+local_test*
+auth_archive*
+.idea/
+
+# yarn error logs
+yarn-error.log
+
+.DS_Store*
+
+# Environment varibales
+# .env*
+!.env*.example
+
+# Code coverage
+coverage

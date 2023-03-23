@@ -1,0 +1,270 @@
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+
+    Orders:
+      type: object
+      properties:
+        _id:
+          type: string
+        status: 
+          type: string
+        creator: 
+          type: string
+        role: 
+          type: string
+        driver: 
+          type: string
+        startTime: 
+          type: string
+        departureCity: 
+          type: string
+        arrivalCity: 
+          type: string
+        departurePoint:
+          type: string
+        arrivalPoint: 
+          type: string
+        createdAt: 
+          type: string
+        updatedAt: 
+          type: string
+        passengers:
+          type: array
+      example: 
+        - _id: 63a6cbaafc3fc21108e0a0c7
+          status: NEW
+          creator: 63af18918e48bc26a1f440f2
+          role: driver
+          driver: 63af18918e48bc26a1f440f2
+          startTime: 2023-12-30T12:30:00.000Z
+          departureCity: TPE
+          arrivalCity: TAN
+          departurePoint: OTHER_STATION
+          arrivalPoint: NO_STATION
+          createdAt: 2022-12-24T09:51:38.821Z
+          updatedAt: 2022-12-30T17:35:21.257Z
+          passengers:
+            - userId: 111
+              status: NEW
+            - userId: 222
+              status: CONFIRMED
+            - userId: 333
+              status: CANCELLED
+        - _id: 63a6cbaafc3fc21108e0a0c7
+          status: NEW
+          creator: 63af18918e48bc26a1f440f2
+          role: driver
+          driver: 63af18918e48bc26a1f440f2
+          startTime: 2023-12-30T12:30:00.000Z (UTC + 0 時區)
+          departureCity: TPE
+          arrivalCity: TAN
+          departurePoint: OTHER_STATION
+          arrivalPoint: NO_STATION
+          createdAt: 2022-12-24T09:51:38.821Z
+          updatedAt: 2022-12-30T17:35:21.257Z
+          passengers:
+            - userId: 111
+              status: NEW
+            - userId: 222
+              status: CONFIRMED
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        status: 
+          type: string
+        creator: 
+          type: string
+        role: 
+          type: string
+        driver: 
+          type: string
+        startTime: 
+          type: string
+        departureCity: 
+          type: string
+        arrivalCity: 
+          type: string
+        departurePoint:
+          type: string
+        arrivalPoint: 
+          type: string
+        createdAt: 
+          type: string
+        updatedAt: 
+          type: string
+        passengers:
+          type: array
+      example: 
+          _id: 63a6cbaafc3fc21108e0a0c7
+          status: NEW
+          creator: 63af18918e48bc26a1f440f2
+          role: driver
+          driver: 63af18918e48bc26a1f440f2
+          startTime: 2023-12-30T12:30:00.000Z
+          departureCity: TPE
+          arrivalCity: TAN
+          departurePoint: OTHER_STATION
+          arrivalPoint: NO_STATION
+          createdAt: 2022-12-24T09:51:38.821Z
+          updatedAt: 2022-12-30T17:35:21.257Z
+          passengers:
+            - userId: 111
+              status: NEW
+            - userId: 222
+              status: CONFIRMED
+
+    OrderCreated:
+      type: object
+      properties:
+        orderId:
+          type: string
+      example:
+        orderId: 63af222584cad32d305a4011
+    
+    orderViewed:
+      type: object
+      properties:
+        orderId:
+          type: string
+        driverId:
+          type: string
+        createdTime:
+          type: string
+      example:
+        orderId: 63af222584cad32d305a4011    
+        driverId: 63bfd6d2dcaefa266ef3df1c
+        createdTime: 2023-02-14T10:10:03.366Z
+
+    orderPendingConfirmation:
+      type: object
+      properties:
+        orderId:
+          type: string
+        driverId:
+          type: string
+        passengerId:
+          type: string
+        status:
+          type: string
+      example:
+        - orderId: 63af222584cad32d305a4011    
+          driverId: 33bfd6d2d2258a266ef3df1c
+          passengerId: 13bfd6d2dcaef2258ef3df1c
+          status: PENDING_DRIVER_CONFIRMATION
+        - orderId: 4011222584cad32d30563af2    
+          driverId: 33bfd6d2d2258a266ef3df1c
+          passengerId: 13bfd6d2dcaef2258ef3df1c
+          status: PENDING_PASSENGER_CONFIRMATION
+          
+  responses:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  requestBody:
+    OrderCreate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - role
+              - startTime
+              - departureCity
+              - arrivalCity
+              - departurePoint
+              - arrivalPoint
+              - arrivalPoint
+              - maxPassengerCount
+              - maxBaggageCount
+            properties:
+              role:
+                type: string
+                enum:
+                  - DRIVER
+                  - PASSENGER
+              startTime:
+                type: string
+                format: date-time
+              departureCity:
+                type: string
+              arrivalCity:
+                type: string
+              departurePoint:
+                type: string
+              arrivalPoint:
+                type: string
+              maxPassengerCount:
+                type: number
+              maxBaggageCount:
+                type: number
+              note:
+                type: string  
+            example:
+              role: DRIVER
+              startTime: 2023-12-30 20:30
+              departureCity: TPE
+              arrivalCity: TAN
+              departurePoint: TPE_STATION
+              arrivalPoint: TAN_STATION
+              maxPassengerCount: 2
+              maxBaggageCount: 2
+              note: 禁止吸煙
+              
+    OrderMatch:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - startTime
+              - departureCity
+              - arrivalCity
+            properties:
+              startTime:  
+                type: string
+              departureCity:
+                type: string
+              arrivalCity:
+                type: string
+              departurePoint:
+                type: string
+              arrivalPoint:
+                type: string
+            example:
+              startTime: 2023-12-30 20:30
+              departureCity: TPE
+              arrivalCity: TAN
+              departurePoint: TPE_STATION
+              arrivalPoint: TAN_STATION
+    HandlePassengerApplication:
+      require: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orderId
+              - userId
+            properties:
+              orderId:
+                type: string
+              userId:
+                type: string
+            example:
+              orderId: 63a6cbaafc3fc21108e0a0c7
+              userId: 63a834356a52e72a4ec11b9e
